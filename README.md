@@ -22,6 +22,7 @@ Just changes the necessary lines, in a clean way.
 - Can't place a new item at the end of an element children yet :P
 - Unit files need to be properly formatted
 - Skips a few units due to `return {` not at the beginning.
+- Can't set the right order for inserts into numbered arrays yet.
 - Atm shouldn't be run twice since it doesn't check if changes already at destination atm, so `BAR.sdd/units` should correspond to `baked_defs.orig` before running this.
 
 ### License
