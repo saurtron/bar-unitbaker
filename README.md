@@ -25,6 +25,8 @@ Just changes the necessary lines, in a clean way.
 - Can't set the right order for inserts into numbered arrays yet.
 - Atm shouldn't be run twice since it doesn't check if changes already at destination atm, so `BAR.sdd/units` should correspond to `baked_defs.orig` before running this.
 
+Mostly untested yet!.
+
 ### License
 
 - GPLv3, see https://www.gnu.org/licenses/gpl-3.0.en.html.
