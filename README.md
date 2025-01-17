@@ -2,6 +2,8 @@
 
 Bakes unitcontent differences between `baked_defs.orig` and `baked_defs`, into BAR.ssd/units.
 
+Just changes the necessary lines, in a clean way.
+
 #### How to use
 
 1. Put this scripts inside your `data/` folder.
