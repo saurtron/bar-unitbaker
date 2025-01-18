@@ -163,11 +163,12 @@ def process_line(line, line_pos, units, stack, path, all_attrs):
         elmt = units
         for p in path:
             elmt = elmt[p]
-        elmt[name] = value
-        all_attrs[tuple(path+[name])] = line_pos
+        name_downcase = name.lower()
+        elmt[name_downcase] = value
+        all_attrs[tuple(path+[name_downcase])] = line_pos
         if new_elmt:
             stack = stack + 1
-            path.append(name)
+            path.append(name_downcase)
     elif b'}' in line:
             stack = stack - 1
             path.pop()
