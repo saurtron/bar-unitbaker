@@ -6,7 +6,8 @@ Just changes the necessary lines, in a clean way.
 
 #### How to use
 
-1. Put this scripts inside your `data/` folder.
+1. Put this foder inside your `data/` folder.
+  * should look like `data/bar-unitbaker`
 1. Before changing anything, bake with bar's baker widget
 1. Copy `baked_defs` into `baked_defs.orig`
 1. Change things and `bake` new `baked_defs`

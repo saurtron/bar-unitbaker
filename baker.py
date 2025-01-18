@@ -17,8 +17,8 @@ def compare_paths(path1, path2, path3):
     unitbake.run_apply_diffs('units', diff_dict, paths3, attrs3)
 
 if __name__ == '__main__':
-    path1 = os.path.join('baked_defs.orig', 'units')
-    path2 = os.path.join('baked_defs', 'units')
-    path3 = os.path.join('games', 'BAR.sdd', 'units')
+    path1 = os.path.join('..', 'baked_defs.orig', 'units')
+    path2 = os.path.join('..', 'baked_defs', 'units')
+    path3 = os.path.join('..', 'games', 'BAR.sdd', 'units')
     compare_paths(path1, path2, path3)
     
