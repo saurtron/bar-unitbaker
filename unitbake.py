@@ -181,6 +181,9 @@ def process_block(data, blocks, block_pos, units, all_attrs):
     for idx, pos in enumerate(lines[:-1]):
         line = data[pos:lines[idx+1]]
         stack = process_line(line, pos, units, stack, path, all_attrs)
+        if not path:
+            # no unit was found
+            return
 
 def process_data(data, file_path, all_units, all_paths, all_attrs):
     if not data.startswith(b'return {'):
