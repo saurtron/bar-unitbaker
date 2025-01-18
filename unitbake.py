@@ -327,7 +327,7 @@ def find_diff(d1, d2, path, diff_dict):
                 find_diff(d1[k],d2[k], b"%s/%s" % (path, k) if path else k, diff_dict)
             elif d1[k] != d2[k] and d1[k].strip(b',') != d2[k].strip(b','):
                 result = [ "%s: " % path, " - %s : %s" % (k, d1[k]) , " + %s : %s" % (k, d2[k])]
-                diff_dict[b"%s/%s" % (path, k) if path else k] = (b'd', d1[k])
+                diff_dict[b"%s/%s" % (path, k) if path else k] = (b'd', d2[k])
         else:
             diff_dict[b"%s/%s" % (path, k) if path else k] = (b'-', d1[k])
     for k in d2:
