@@ -1,6 +1,6 @@
 ### BAR UnitBaker
 
-Bakes unitcontent differences between `baked_defs.orig` and `baked_defs`, into BAR.ssd/units.
+Bakes unitcontent differences between `baked_defs.orig` and `baked_defs`, into BAR.sdd/units.
 
 Just changes the necessary lines, in a clean way.
 
