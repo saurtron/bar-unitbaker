@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout,
 from PyQt5.QtWidgets import QTextEdit, QProgressBar, QSizeGrip
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
-data_dir = os.path.dirname(script_dir)
 sys.path.append(script_dir)
 
 import unitbake

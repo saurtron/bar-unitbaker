@@ -7,12 +7,12 @@ gi.require_version('Adw', '1')
 from gi.repository import GLib, Gtk, Adw
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
-data_dir = os.path.dirname(script_dir)
 sys.path.append(script_dir)
 
 import unitbake
 import baker
 import prebake
+import traceback
 
 
 class MainWindow(Gtk.ApplicationWindow):
@@ -67,13 +67,18 @@ class MainWindow(Gtk.ApplicationWindow):
         self.button_bake.connect('clicked', self.bake)
 
     def worker_thread(self, title, run_method):
+        ok = False
         try:
             run_method()
+            ok = True
         except Exception as e:
-            GLib.idle_add(self.log, title + ' Failed')
-            return
-        GLib.idle_add(self.log, title + ' Finished')
+            GLib.idle_add(self.log, "Error: {}".format(e))
+            traceback.print_exc()
         GLib.idle_add(self.enable_buttons, True)
+        if ok:
+            GLib.idle_add(self.log, title + ' Finished')
+        else:
+            GLib.idle_add(self.log, title + ' Failed')
 
     def enable_buttons(self, enable):
         self.progress_bar.set_sensitive(not enable)
