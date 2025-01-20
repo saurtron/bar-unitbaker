@@ -1,7 +1,8 @@
 import re
 
 splitter_regex = None
-line_regex = None
+
+regex_store = {}
 
 class Match():
     def __init__(self, match, index):
@@ -26,16 +27,26 @@ class Match():
             return getattr(self._match, name)
         raise AttributeError
 
-def create_line_regex():
-    global line_regex
-    if line_regex:
-        return line_regex
-    #regex = b'[\s]*?(\\[?[\w\.]+\\]?)[\s]*\=[\s]*(.*),?[\s]*(?:\-\-.*)'
-    regex = b'[\s]*?(\\[?[\w\.]+\\]?)[\s]*\=[\s]*(.*),?[\s]*[\-]?[\-]?'
-    #regex = b'[\s]*?(\\[?[\w\.]+\\]?)[\s]*[=][\s]*(.*),?'
-    pat = re.compile(regex, re.DOTALL)
-    line_regex = pat
+def create_simple_regex(key, regex, *regex_opts):
+    pat = regex_store.get(key, None)
+    if pat:
+        return pat
+    pat = re.compile(regex, *regex_opts)
+    regex_store[key] = pat
     return pat
+
+def create_all_regex():
+    regex = b'[\s]*?(\\[?[\w\.]+\\]?)[\s]*\=[\s]*(.*),?[\s]*[\-]?[\-]?'
+    create_simple_regex('line', regex, re.DOTALL)
+    regex = b'.*=[\s]*([\w\"\-]*),?'
+    create_simple_regex('attr', regex, re.DOTALL)
+    regex = b'[\s]*(.*)=.*'
+    create_simple_regex('val', regex, re.DOTALL)
+
+def get_regex(key):
+    return regex_store[key]
+
+create_all_regex()
 
 def create_splitter_regex():
     global splitter_regex

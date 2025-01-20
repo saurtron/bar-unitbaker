@@ -4,7 +4,7 @@ import sys
 import re
 import pprint
 from .regexlib import Match
-from .regexlib import create_line_regex, create_splitter_regex
+from .regexlib import get_regex, create_splitter_regex
 
 argv = sys.argv.copy()
 do_write = False
@@ -101,7 +101,7 @@ def all_lines(data, blocks, block_pos):
 
 def process_line(data, line_orig, line_pos, line_end, units, stack, path, all_attrs):
     line = line_orig.strip(b"\r\n\t")
-    pat = create_line_regex()
+    pat = get_regex('line')
     m = pat.search(line)
     if m:
         name = m.group(1)
@@ -197,7 +197,8 @@ def format_attribute(path, val, preface):
     return b'\r\n'.join(lines)+b'\r\n'
 
 def parse_line_attr(line):
-    m = re.match(b'.*=[\s]*([\w\"\-]*),?', line, re.DOTALL)
+    pat = get_regex('attr')
+    m = pat.match(line)
     if not m:
         print("cant find!!!", line)
     val_start = m.start(1)
@@ -214,7 +215,8 @@ def apply_op_add(data, path, val, line_start, prev_line_start, all_attrs):
     else:
         preface_line = line
     # TODO: check comments!
-    m = re.match(b'[\s]*(.*)=.*', preface_line, re.DOTALL)
+    pat = get_regex('val')
+    m = pat.match(preface_line)
     if not m:
         print("cant find!!!", preface_line)
     val_start = m.start(1)
