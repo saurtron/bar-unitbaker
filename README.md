@@ -7,7 +7,7 @@ Just changes the necessary lines, in a clean way.
 #### How to use
 
 1. Put this foder inside your `data/` folder.
-  * should look like `data/bar-unitbaker`
+   * should look like `data/bar-unitbaker`
 1. Before changing anything, bake with bar's baker widget
 1. Run prebake.py
 1. Change things and `bake` new `baked_defs`
