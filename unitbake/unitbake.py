@@ -6,6 +6,13 @@ import pprint
 from .regexlib import Match
 from .regexlib import get_regex, create_splitter_regex
 
+def report_progress(progress):
+    pass
+
+def set_progress_cb(cb):
+    global progress_func
+    progress_func = cb
+
 argv = sys.argv.copy()
 do_write = False
 dest_file = None
@@ -312,11 +319,15 @@ def find_diff(d1, d2, path, diff_dict):
 
 
 def run_apply_diffs(path, diff_dict, unit_paths, all_attrs):
+    total_elmts = len(diff_dict.keys())
+    n = 1
     for unit_name, diff_data in diff_dict.items():
+        report_progress(n/total_elmts)
         if unit_name in unit_paths:
             apply_diff(unit_name, diff_data, unit_paths[unit_name], all_attrs)
         else:
             print(unit_name, "not found!")
+        n += 1
 
 def run(dest_file, dest_dir):
     all_units = {}
