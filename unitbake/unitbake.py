@@ -2,9 +2,10 @@ import os
 import os.path
 import sys
 import re
-import pprint
+import json
 from .regexlib import Match
 from .regexlib import get_regex, create_splitter_regex
+from .lang import decorate_unit_name
 
 progress_base = 0.0
 progress_total = 1.0
@@ -336,7 +337,7 @@ def run_apply_diffs(path, diff_dict, unit_paths, all_attrs):
     n = 1
     for unit_name, diff_data in diff_dict.items():
         if unit_name in unit_paths:
-            report_progress(n/total_elmts, 'write ' + unit_name.decode())
+            report_progress(n/total_elmts, 'writing: ' + decorate_unit_name(unit_name.decode()))
             apply_diff(unit_name, diff_data, unit_paths[unit_name], all_attrs)
         else:
             print(unit_name, "not found!")

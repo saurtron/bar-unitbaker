@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import shutil
 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
@@ -39,6 +40,7 @@ def compare_paths(path1, path2, path3):
     progress_func(1.0, 'Done')
 
 def bake_all():
+    unitbake.load_languages(os.path.join(datadir, 'games', 'BAR.sdd'))
     work_dir = os.path.join(scriptdir, 'workdir')
 
     path1 = os.path.join(work_dir, 'baked_defs.orig', 'units')
