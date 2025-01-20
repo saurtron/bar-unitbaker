@@ -14,7 +14,29 @@ Just changes the necessary lines, in a clean way.
 1. Run baker.py and it should place just the things you modified into bar's units/ folder.
 1. Rinse and repeat from 4. until you're happy
 
-### Use with care!!
+**Use with care!!**
+
+### Gui
+
+You can run the Qt5 gui using `baker-qt5.py`.
+
+You can run the Gtk4 gui using `baker-gtk.py`.
+
+You will probably need to install dependencies:
+
+#### Qt5
+
+`pip install PyQt5`
+
+See https://pypi.org/project/PyQt5/ for more information.
+
+For debian/ubuntu, you can instead do `sudo apt install python3-pyqt5`
+
+#### PyGtk
+
+For debian/ubuntu, you can do `sudo apt install python3-gi`
+
+For windows, not sure how you can do it, probably better use qt5.
 
 ### Missing features
 
