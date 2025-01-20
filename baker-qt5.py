@@ -1,8 +1,8 @@
 import os
 import sys
-from PyQt5.QtCore import pyqtSignal, QThread
+from PyQt5.QtCore import Qt, pyqtSignal, QThread
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QHBoxLayout
-from PyQt5.QtWidgets import QTextEdit, QProgressBar
+from PyQt5.QtWidgets import QTextEdit, QProgressBar, QSizeGrip
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 data_dir = os.path.dirname(script_dir)
@@ -50,6 +50,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("My App")
+        self.setWindowFlags(Qt.Window | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         self.create_widgets()
         self._worker = Thread(self)
         self._worker.log.connect(self.log)
@@ -61,6 +62,8 @@ class MainWindow(QMainWindow):
         self.button_bake.setEnabled(True)
         self.button_prebake.setEnabled(True)
         self.log("Finished")
+        self.pbar.reset()
+        self.pbar.setEnabled(False)
 
     def log(self, txt):
         self.logOutput.append(txt)
@@ -96,8 +99,13 @@ class MainWindow(QMainWindow):
         self.logOutput = logOutput
         layout_content.addWidget(logOutput)
 
+        layout_bar = QHBoxLayout()
         self.pbar = QProgressBar(self)
-        layout_content.addWidget(self.pbar)
+        layout_bar.addWidget(self.pbar)
+
+        self.size_grip = QSizeGrip(self)
+        layout_bar.addWidget(self.size_grip, 0, Qt.AlignBottom | Qt.AlignRight)
+        layout_content.addLayout(layout_bar)
 
         hlayout.addLayout(layout_content)
 
@@ -105,8 +113,10 @@ class MainWindow(QMainWindow):
         widget = QWidget()
         widget.setLayout(hlayout)
         self.setCentralWidget(widget)
+        self.pbar.setEnabled(False)
 
     def prebake(self):
+        self.pbar.setEnabled(True)
         self.button_bake.setEnabled(False)
         self.button_prebake.setEnabled(False)
         self.logOutput.clear()
@@ -115,6 +125,7 @@ class MainWindow(QMainWindow):
         self._worker.start()
 
     def bake(self):
+        self.pbar.setEnabled(True)
         self.button_bake.setEnabled(False)
         self.button_prebake.setEnabled(False)
         self.logOutput.clear()
