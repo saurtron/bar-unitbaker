@@ -1,0 +1,11 @@
+workdir
+__pycache__
+*~
+*.swp
+*.swo
+.vscode
+.idea
+*.code-workspace
+.project
+*.iml
+
