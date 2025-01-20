@@ -13,6 +13,7 @@ debugblocks = False
 debugstack = False
 debuglocals = False
 debugspeedups = False
+notfound_files = []
 
 if '-write' in argv:
     do_write = True
@@ -193,6 +194,7 @@ def process_data(data, file_path, all_units, all_paths, all_attrs):
             print("No return", file_path)
         else:
             print("Not starts with return", file_path)
+        notfound_files.append(os.path.basename(file_path))
         return {}
     units = {}
     blocks, first_brace = find_block_limits(data, 0, 'blocks')
@@ -373,6 +375,8 @@ def run(dest_file, dest_dir):
         walk_file(dest_file, process_file, process_data, all_units, all_paths, all_attrs)
     else:
         walk_dir(dest_dir, process_file, process_data, all_units, all_paths, all_attrs)
+    if notfound_files:
+        print("NOT FOUND", notfound_files)
     return all_units, all_paths, all_attrs
 
 
