@@ -59,14 +59,15 @@ class MainWindow(QMainWindow):
         self._worker.finished.connect(lambda: self.workerFinished())
 
     def workerFinished(self):
-        self.button_bake.setEnabled(True)
-        self.button_prebake.setEnabled(True)
         self.log("Finished")
         self.pbar.reset()
-        self.pbar.setEnabled(False)
+        self.enable_buttons(True)
 
     def log(self, txt):
         self.logOutput.append(txt)
+
+    def clear_log(self):
+        self.logOutput.clear()
 
     def report_progress(self, value):
         self.pbar.setValue(int(value*100.0))
@@ -115,23 +116,24 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
         self.pbar.setEnabled(False)
 
-    def prebake(self):
-        self.pbar.setEnabled(True)
-        self.button_bake.setEnabled(False)
-        self.button_prebake.setEnabled(False)
-        self.logOutput.clear()
-        self.logOutput.append("Prebake")
-        self._worker.setMethod(prebake.prebake)
+    def enable_buttons(self, enable):
+        self.pbar.setEnabled(not enable)
+        self.button_bake.setEnabled(enable)
+        self.button_prebake.setEnabled(enable)
+
+    def run_worker(self, title, run_method):
+        self.clear_log()
+        self.log(title)
+        self._worker.setMethod(run_method)
         self._worker.start()
 
+    def prebake(self):
+        self.enable_buttons(False)
+        self.run_worker("Prebake", prebake.prebake)
+
     def bake(self):
-        self.pbar.setEnabled(True)
-        self.button_bake.setEnabled(False)
-        self.button_prebake.setEnabled(False)
-        self.logOutput.clear()
-        self.logOutput.append("Bake")
-        self._worker.setMethod(baker.bake_all)
-        self._worker.start()
+        self.enable_buttons(False)
+        self.run_worker("Bake", baker.bake_all)
 
 app = QApplication(sys.argv)
 

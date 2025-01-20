@@ -31,6 +31,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.progress_bar = Gtk.ProgressBar()
         self.box_content.append(self.progress_bar)
         baker.set_progress_cb(self.report_progress)
+        self.progress_bar.set_sensitive(False)
 
     def report_progress(self, progress, text=None):
         GLib.idle_add(self.progress_bar.set_fraction, progress)
@@ -40,6 +41,10 @@ class MainWindow(Gtk.ApplicationWindow):
     def log(self, text):
         self.textbuffer.insert(self.textiter, text)
         self.textbuffer.insert(self.textiter, "\n")
+
+    def clear_log(self):
+        self.textbuffer.set_text("")
+        self.textiter = self.textbuffer.get_end_iter()
 
     def create_textview(self):
         scrolledwindow = Gtk.ScrolledWindow()
@@ -60,33 +65,34 @@ class MainWindow(Gtk.ApplicationWindow):
         self.box_controls.append(self.button_bake)
         self.button_bake.connect('clicked', self.bake)
 
-    def prebake_thread(self, *args):
+    def worker_thread(self, title, run_method):
         try:
-            prebake.prebake()
+            run_method()
         except Exception as e:
-            GLib.idle_add(self.log, 'Prebake Failed')
+            GLib.idle_add(self.log, title + ' Failed')
             return
-        GLib.idle_add(self.log, 'Prebake Finished')
+        GLib.idle_add(self.log, title + ' Finished')
+        GLib.idle_add(self.enable_buttons, True)
 
-    def bake_thread(self, *args):
-        try:
-            baker.bake_all()
-        except Exception as e:
-            GLib.idle_add(self.log, 'Bake Failed')
-            return
-        GLib.idle_add(self.log, 'Bake Finished')
+    def enable_buttons(self, enable):
+        self.progress_bar.set_sensitive(not enable)
+        self.button_bake.set_sensitive(enable)
+        self.button_prebake.set_sensitive(enable)
+
+    def run_worker(self, title, run_method):
+        self.clear_log()
+        self.log(title + "Start")
+        thread = threading.Thread(target=self.worker_thread, args=(title, run_method))
+        thread.daemon = True
+        thread.start()
 
     def prebake(self, button):
-        self.log("Prebake Start")
-        thread = threading.Thread(target=self.prebake_thread)
-        thread.daemon = True
-        thread.start()
+        self.enable_buttons(False)
+        self.run_worker("Prebake", prebake.prebake)
 
     def bake(self, button):
-        self.log("Bake Start")
-        thread = threading.Thread(target=self.bake_thread)
-        thread.daemon = True
-        thread.start()
+        self.enable_buttons(False)
+        self.run_worker("Bake", baker.bake_all)
 
 class MyApp(Adw.Application):
     def __init__(self, **kwargs):
