@@ -8,7 +8,7 @@ sys.path.append(scriptdir)
 
 import unitbake
 
-def report_progress(progress):
+def report_progress(progress, text=None):
     pass
 
 progress_func = report_progress
@@ -19,13 +19,13 @@ def set_progress_cb(cb):
 
 
 def compare_paths(path1, path2, path3):
-    progress_func(0.25)
+    progress_func(0.25, 'Parse original baked_defs')
     units1, paths1, attrs1 = unitbake.run(None, path1)
-    progress_func(0.5)
+    progress_func(0.5, 'Parse modified baked_defs')
     units2, paths2, attrs2 = unitbake.run(None, path2)
-    progress_func(0.75)
+    progress_func(0.75, 'Parse bar unit files')
     units3, paths3, attrs3 = unitbake.run(None, path3)
-    progress_func(0.9)
+    progress_func(0.9, 'Apply changes')
 
     diff_dict = {}
     for unit_name, unit_dict in units1.items():
@@ -35,7 +35,7 @@ def compare_paths(path1, path2, path3):
             diff_dict[unit_name] = unit_diff
 
     unitbake.run_apply_diffs('units', diff_dict, paths3, attrs3)
-    progress_func(1.0)
+    progress_func(1.0, 'Done')
 
 def bake_all():
     work_dir = os.path.join(scriptdir, 'workdir')

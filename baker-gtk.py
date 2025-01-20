@@ -32,8 +32,10 @@ class MainWindow(Gtk.ApplicationWindow):
         self.box_content.append(self.progress_bar)
         baker.set_progress_cb(self.report_progress)
 
-    def report_progress(self, progress):
+    def report_progress(self, progress, text=None):
         GLib.idle_add(self.progress_bar.set_fraction, progress)
+        if text:
+            GLib.idle_add(self.log, text)
 
     def log(self, text):
         self.textbuffer.insert(self.textiter, text)
