@@ -19,7 +19,7 @@ class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_default_size(600, 250)
-        self.set_title("MyApp")
+        self.set_title("BAR Baker")
         self.box_top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.box_controls = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.box_content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
