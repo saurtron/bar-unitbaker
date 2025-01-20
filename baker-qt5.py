@@ -22,6 +22,7 @@ class Thread(QThread):
     def setMethod(self, cb):
         if not self.isRunning():
             baker.set_progress_cb(self.report_progress)
+            prebake.set_progress_cb(self.report_progress)
             self.cb = cb
 
     def report_progress(self, val, text=None):

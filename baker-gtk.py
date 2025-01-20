@@ -31,6 +31,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.progress_bar = Gtk.ProgressBar()
         self.box_content.append(self.progress_bar)
         baker.set_progress_cb(self.report_progress)
+        prebake.set_progress_cb(self.report_progress)
         self.progress_bar.set_sensitive(False)
 
     def report_progress(self, progress, text=None):
