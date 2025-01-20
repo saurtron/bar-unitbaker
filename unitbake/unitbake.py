@@ -6,12 +6,25 @@ import pprint
 from .regexlib import Match
 from .regexlib import get_regex, create_splitter_regex
 
-def report_progress(progress):
+progress_base = 0.0
+progress_total = 1.0
+
+def progress_func_internal(progress, text):
     pass
 
-def set_progress_cb(cb):
+progress_func = progress_func_internal
+
+def report_progress(progress, text):
+    print(progress, text)
+    progress_func(progress_base+progress*progress_total, text)
+
+def set_progress_cb(cb, p_base, p_total):
     global progress_func
+    global progress_base
+    global progress_total
     progress_func = cb
+    progress_base = p_base
+    progress_total = p_total
 
 argv = sys.argv.copy()
 do_write = False
@@ -322,8 +335,8 @@ def run_apply_diffs(path, diff_dict, unit_paths, all_attrs):
     total_elmts = len(diff_dict.keys())
     n = 1
     for unit_name, diff_data in diff_dict.items():
-        report_progress(n/total_elmts)
         if unit_name in unit_paths:
+            report_progress(n/total_elmts, 'write ' + unit_name.decode())
             apply_diff(unit_name, diff_data, unit_paths[unit_name], all_attrs)
         else:
             print(unit_name, "not found!")

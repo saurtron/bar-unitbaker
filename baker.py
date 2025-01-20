@@ -34,6 +34,7 @@ def compare_paths(path1, path2, path3):
         if unit_diff:
             diff_dict[unit_name] = unit_diff
 
+    unitbake.set_progress_cb(progress_func, 0.9, 0.1)
     unitbake.run_apply_diffs('units', diff_dict, paths3, attrs3)
     progress_func(1.0, 'Done')
 
