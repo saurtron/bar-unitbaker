@@ -149,8 +149,8 @@ def all_lines(data, blocks, block_pos):
         lines.append(pos)
     return lines
 
-def process_line(line, line_pos, units, stack, path, all_attrs):
-    line = line.strip(b"\r\n\t")
+def process_line(data, line_orig, line_pos, line_end, units, stack, path, all_attrs):
+    line = line_orig.strip(b"\r\n\t")
     pat = create_line_regex()
     m = pat.search(line)
     if m:
@@ -165,11 +165,12 @@ def process_line(line, line_pos, units, stack, path, all_attrs):
             elmt = elmt[p]
         name_downcase = name.lower()
         elmt[name_downcase] = value
-        all_attrs[tuple(path+[name_downcase])] = line_pos
+        all_attrs[tuple(path+[name_downcase])] = [line_pos, line_end]
         if new_elmt:
             stack = stack + 1
             path.append(name_downcase)
     elif b'}' in line:
+            all_attrs[tuple(path)][1] = line_end
             stack = stack - 1
             path.pop()
     return stack
@@ -180,7 +181,8 @@ def process_block(data, blocks, block_pos, units, all_attrs):
     path = []
     for idx, pos in enumerate(lines[:-1]):
         line = data[pos:lines[idx+1]]
-        stack = process_line(line, pos, units, stack, path, all_attrs)
+        line_end = lines[idx+1]
+        stack = process_line(data, line, pos, line_end, units, stack, path, all_attrs)
         if not path:
             # no unit was found
             return
@@ -220,7 +222,7 @@ def walk_dir(dest_dir, cb, *args):
                 file_path = os.path.join(path, file)
                 cb(file_path, *args)
 
-def apply_op_rm(data, path, val, line_start, all_attrs):
+def apply_op_rm(data, path, val, line_start, attr_end, all_attrs):
     line_end = data.find(b'\n', line_start) + 1
     return data[:line_start]+data[line_end:]
 
@@ -243,32 +245,48 @@ def format_attribute(path, val, preface):
         lines.append(line)
     return b'\r\n'.join(lines)+b'\r\n'
 
-def apply_op_add(data, path, val, line_start, all_attrs):
-    line_end = data.find(b'\n', line_start)
-    line = data[line_start:line_end]
-    print(" *", data[line_start:line_start+10])
-    # TODO: check comments!
-    m = re.match(b'[\s]*(.*)=.*', line, re.DOTALL)
-    if not m:
-        print("cant find!!!", line)
-    val_start = m.start(1)
-    val_end = m.end(1)
-    preface = line[:val_start]
-    attr = format_attribute(path, val, preface)
-    data = data[:line_start]+attr+data[line_start:]
-    return data
-
-
-def apply_op_change(data, path, val, line_start, all_attrs):
-    line_end = data.find(b'\n', line_start)
-    line = data[line_start:line_end]
-    # TODO: check comments!
+def parse_line_attr(line):
     m = re.match(b'.*=[\s]*([\w\"\-]*),?', line, re.DOTALL)
     if not m:
         print("cant find!!!", line)
     val_start = m.start(1)
     val_end = m.end(1)
     ending = line[val_end:]
+    return val_start, ending, m
+
+def apply_op_add(data, path, val, line_start, prev_line_start, all_attrs):
+    line_end = data.find(b'\n', line_start)
+    line = data[line_start:line_end]
+    if prev_line_start:
+        prev_line_end = data.find(b'\n', prev_line_start)+1
+        preface_line = data[prev_line_start:prev_line_end]
+    else:
+        preface_line = line
+    # TODO: check comments!
+    m = re.match(b'[\s]*(.*)=.*', preface_line, re.DOTALL)
+    if not m:
+        print("cant find!!!", preface_line)
+    val_start = m.start(1)
+    val_end = m.end(1)
+    preface = preface_line[:val_start]
+    attr = format_attribute(path, val, preface)
+    if prev_line_start:
+        val_start, ending, m = parse_line_attr(preface_line)
+        if not ending.startswith(b','):
+            ending = b',' + ending
+        new_val = m.group(1)+ending
+        val_start = val_start+prev_line_start
+        data = data[:val_start]+new_val+attr+data[line_start:]
+    else:
+        data = data[:line_start]+attr+data[line_start:]
+    return data
+
+
+def apply_op_change(data, path, val, line_start, attr_end, all_attrs):
+    line_end = data.find(b'\n', line_start)
+    line = data[line_start:line_end]
+    # TODO: check comments!
+    val_start, ending, m = parse_line_attr(preface_line)
     new_val = val.strip(b',')+ending
     old_val = line[val_start:]
     val_start = val_start+line_start
@@ -276,13 +294,14 @@ def apply_op_change(data, path, val, line_start, all_attrs):
     return data
 
 def apply_diff_operations(data, ops, all_attrs):
-    for op, path, val, line_start in ops:
+    for op, path, val, line_start, attr_end in ops:
         if op == b'd':
-            data = apply_op_change(data, path, val, line_start, all_attrs)
+            data = apply_op_change(data, path, val, line_start, attr_end, all_attrs)
         elif op == b'-':
-            data = apply_op_rm(data, path, val, line_start, all_attrs)
+            data = apply_op_rm(data, path, val, line_start, attr_end, all_attrs)
         elif op == b'+':
-            data = apply_op_add(data, path, val, line_start, all_attrs)
+            print(path, val)
+            data = apply_op_add(data, path, val, line_start, attr_end, all_attrs)
     return data
      
 def find_insertion_pos(path, all_attrs):
@@ -290,9 +309,12 @@ def find_insertion_pos(path, all_attrs):
     children = filter(lambda s: len(s) == len(path) and s[:-1] == parent_path, all_attrs)
     last_path = path[-1]
     prev_child = parent_path
+    last_child = None
     for child in children:
         if child[-1] > last_path:
-            return all_attrs[child]
+            return all_attrs[child][0], None
+        last_child = child
+    return (all_attrs[child][1], all_attrs[last_child][0])
     # TODO: find next same level as parent?
     raise Exception("Can't find location")
 
@@ -307,12 +329,13 @@ def apply_diff(unit_name, diff_data, file_path, all_attrs):
         if op == b'+':
             add_ops.append((path_s, path, val))
         else:
-            linen = all_attrs[path]
-            ops.append((op, path, val, linen))
+            linen = all_attrs[path][0]
+            line_end = all_attrs[path][1]
+            ops.append((op, path, val, linen, line_end))
     add_ops.sort(key=lambda s: s[0])
     for path_s, path, val in add_ops:
-        linen = find_insertion_pos(path, all_attrs)
-        ops.append((b'+', path, val, linen))
+        linen, next_line = find_insertion_pos(path, all_attrs)
+        ops.append((b'+', path, val, linen, next_line))
     ops.sort(key=lambda s: -s[3])
     with open(file_path, 'rb') as f:
         data = f.read()
@@ -337,7 +360,10 @@ def find_diff(d1, d2, path, diff_dict):
 
 def run_apply_diffs(path, diff_dict, unit_paths, all_attrs):
     for unit_name, diff_data in diff_dict.items():
-        apply_diff(unit_name, diff_data, unit_paths[unit_name], all_attrs)
+        if unit_name in unit_paths:
+            apply_diff(unit_name, diff_data, unit_paths[unit_name], all_attrs)
+        else:
+            print(unit_name, "not found!")
 
 def run(dest_file, dest_dir):
     all_units = {}

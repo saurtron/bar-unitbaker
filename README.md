@@ -20,7 +20,6 @@ Just changes the necessary lines, in a clean way.
 (coming/to be fixed soon)
 
 - Doesn't yet respect comments in the changed lines
-- Can't place a new item at the end of an element children yet :P
 - Unit files need to be properly formatted
 - Skips a few unitdef files due to `return {` not at the beginning.
 - Can't set the right order for inserts into numbered arrays yet.
