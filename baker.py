@@ -4,7 +4,6 @@ import json
 import shutil
 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
-datadir = os.path.dirname(scriptdir)
 sys.path.append(scriptdir)
 
 import unitbake
@@ -40,24 +39,18 @@ def compare_paths(path1, path2, path3):
     progress_func(1.0, 'Done')
 
 def bake_all():
-    unitbake.load_languages(os.path.join(datadir, 'games', 'BAR.sdd'))
-    work_dir = os.path.join(scriptdir, 'workdir')
+    dirs = unitbake.get_dirs(scriptdir)
+    unitbake.load_languages(dirs.game_dir)
 
-    path1 = os.path.join(work_dir, 'baked_defs.orig', 'units')
-    path2 = os.path.join(datadir, 'baked_defs', 'units')
-    path_units = os.path.join(datadir, 'games', 'BAR.sdd', 'units')
-    path_units_orig = os.path.join(work_dir, 'units.orig')
-    path3 = os.path.join(work_dir, 'units')
+    if os.path.exists(dirs.write_units):
+        shutil.rmtree(dirs.write_units)
+    shutil.copytree(dirs.backup_units, dirs.write_units)
 
-    if os.path.exists(path3):
-        shutil.rmtree(path3)
-    shutil.copytree(path_units_orig, path3)
+    compare_paths(dirs.backup_baked, dirs.new_baked, dirs.write_units)
 
-    compare_paths(path1, path2, path3)
-
-    if os.path.exists(path_units):
-        shutil.rmtree(path_units)
-    shutil.copytree(path3, path_units)
+    if os.path.exists(dirs.game_units):
+        shutil.rmtree(dirs.game_units)
+    shutil.copytree(dirs.write_units, dirs.game_units)
 
 if __name__ == '__main__':
     bake_all()
