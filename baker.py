@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 
 scriptdir = os.path.dirname(os.path.realpath(__file__))
 datadir = os.path.dirname(scriptdir)
@@ -22,8 +23,21 @@ def compare_paths(path1, path2, path3):
     unitbake.run_apply_diffs('units', diff_dict, paths3, attrs3)
 
 if __name__ == '__main__':
-    path1 = os.path.join(datadir, 'baked_defs.orig', 'units')
+    work_dir = os.path.join(scriptdir, 'workdir')
+
+    path1 = os.path.join(work_dir, 'baked_defs.orig', 'units')
     path2 = os.path.join(datadir, 'baked_defs', 'units')
-    path3 = os.path.join(datadir, 'games', 'BAR.sdd', 'units')
+    path_units = os.path.join(datadir, 'games', 'BAR.sdd', 'units')
+    path_units_orig = os.path.join(work_dir, 'units.orig')
+    path3 = os.path.join(work_dir, 'units')
+
+    if os.path.exists(path3):
+        shutil.rmtree(path3)
+    shutil.copytree(path_units_orig, path3)
+
     compare_paths(path1, path2, path3)
-    
+
+    if os.path.exists(path_units):
+        shutil.rmtree(path_units)
+    shutil.copytree(path3, path_units)
+
